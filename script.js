@@ -29,7 +29,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
 
 const db = getFirestore(app)
-const docRef = doc(db, "todoItems", "1");
+const docRef = doc(db, "todoitems", "1");
 const docSnap = await getDoc(docRef);
 
 if (docSnap.exists()) {
@@ -39,14 +39,36 @@ if (docSnap.exists()) {
   console.log("No such document!");
 }
 
-
-const q = query(collection(db, "todoItems"), where("erFerdig", "==", false));
-const querySnapshot = await getDocs(q);
+const listeRef = document.getElementById("liste")
+// const q = query(collection(db, "todoitems"), where("erFerdig", "==", false));
+// const querySnapshot = await getDocs(q);
+const querySnapshot = await getDocs(collection(db, "todoitems"));
 querySnapshot.forEach((doc) => {
   // doc.data() is never undefined for query doc snapshots
   console.log(doc.id, " => ", doc.data());
   const item = document.createElement("li")
   // TODO: Legg til oppgave-teksten vår OG bruk appendChild for å legge til på lista
-  item.innerHTML = doc.data()
+  item.innerHTML = doc.data().tekst
+  item.dataset.id = doc.id
+  if (doc.data().erFerdig) {
+    item.classList.add("ferdig")
+  }
   listeRef.appendChild(item)
-});
+  item.addEventListener("click", klikk)
+})
+
+async function klikk(event) {
+  console.log("klikk")
+  console.log(event.target)
+  // Fjern objektet fra lista vår "lokalt":
+  listeRef.removeChild(event.target)
+  // Fjern objektet fra Google Firebase
+  const id = event.target.dataset.id
+  await deleteDoc(doc(db, "todoitems", "DC"));
+}
+
+document.getElementById("knapp").addEventListener("click", leggTilOppgave)
+
+function lettTilOppgave(){
+  
+}
